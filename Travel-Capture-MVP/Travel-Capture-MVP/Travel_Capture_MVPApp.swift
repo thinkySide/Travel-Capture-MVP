@@ -9,9 +9,19 @@ import SwiftUI
 
 @main
 struct Travel_Capture_MVPApp: App {
+    
+    @State private var interactor = Interactor()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            Group {
+                if !interactor.isTracking {
+                    StartView()
+                } else {
+                    TravelView()
+                }
+            }
+            .environment(interactor)
         }
     }
 }
