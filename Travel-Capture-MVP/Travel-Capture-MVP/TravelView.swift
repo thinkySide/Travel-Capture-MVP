@@ -27,14 +27,16 @@ struct TravelView: View {
                 }
             }
             
-            Text("2025. 03. 28 15:00 ~")
+            Text(interactor.startDate.description)
                 .padding(.top, 8)
             
             Spacer()
         }
         .padding(.horizontal, 20)
-        .alert("여행이 종료되었습니다", isPresented: $isFinishAlertPresented) {
-            Button("확인", role: .none) {}
+        .alert("여행이 종료되었습니다!", isPresented: $isFinishAlertPresented) {
+            Button("확인", role: .none) {
+                interactor.stop()
+            }
         } message: {
             Text("총 \(interactor.images.count)장 앨범 저장 완료 ")
         }

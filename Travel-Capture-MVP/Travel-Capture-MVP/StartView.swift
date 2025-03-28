@@ -19,7 +19,7 @@ struct StartView: View {
                 .font(.system(size: 16))
             
             Button("여행 시작하기") {
-                
+                interactor.start()
             }
             .buttonStyle(.borderedProminent)
             .font(.system(size: 20))
