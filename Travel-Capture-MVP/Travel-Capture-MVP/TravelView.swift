@@ -27,10 +27,34 @@ struct TravelView: View {
                 }
             }
             
-            Text(interactor.startDate.description)
-                .padding(.top, 8)
+            HStack {
+                Text(interactor.startDate.description)
+                
+                Spacer()
+                
+                Text("총 \(interactor.images.count)장")
+            }
+            .padding(.top, 8)
             
-            Spacer()
+            ScrollView {
+                // 트러블 슈팅 기록
+                // ForEach(interactor.images, id: \.accessibilityIdentifier)
+                // ID가 동일해서 계속 같은 이미지를 출력하고 있었음,,,
+                // 애꿎은 PhotoKit 쪽만 계속 찾아봤네 ㅜ
+                // 이건 진짜 항상 주의해서 봐야할 것 같음
+                ForEach(interactor.images, id: \.self) { image in
+                    Image(uiImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 200, height: 200)
+                }
+            }
+            .refreshable {
+                interactor.refresh()
+            }
+        }
+        .onAppear {
+            interactor.setup()
         }
         .padding(.horizontal, 20)
         .alert("여행이 종료되었습니다!", isPresented: $isFinishAlertPresented) {

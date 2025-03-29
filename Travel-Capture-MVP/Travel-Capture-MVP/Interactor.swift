@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Photos
 
 @Observable
 final class Interactor {
@@ -24,7 +25,7 @@ final class Interactor {
         self.images = images
         self.startDate = startDate
         self.isTracking = fetchIsTracking()
-        if isTracking { setup() }
+        requestPhotoAuth()
     }
 }
 
@@ -43,15 +44,58 @@ extension Interactor {
         isTracking = false
         saveIsTracking(isTracking)
     }
+    
+    func setup() {
+        if isTracking {
+            title = fetchTitle()
+            startDate = fetchStartDate()
+            fetchPhotos()
+        }
+    }
+    
+    func refresh() {
+        fetchPhotos()
+    }
 }
 
-// MARK: - Setting
+// MARK: - Photos
 
 extension Interactor {
     
-    private func setup() {
-        title = fetchTitle()
-        startDate = fetchStartDate()
+    private func requestPhotoAuth() {
+        Task {
+            await PHPhotoLibrary.requestAuthorization(for: .readWrite)
+        }
+    }
+    
+    private func fetchPhotos() {
+        let predicate = NSPredicate(format: "creationDate > %@", startDate as NSDate)
+        
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.predicate = predicate
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+        
+        let fetchResult = PHAsset.fetchAssets(with: .image, options: fetchOptions)
+        
+        var newImages = [UIImage]()
+        let imageManager = PHImageManager.default()
+        
+        fetchResult.enumerateObjects { asset, _, _ in
+            imageManager.requestImage(
+                for: asset,
+                targetSize: .init(width: 200, height: 200),
+                contentMode: .aspectFill,
+                options: nil,
+                resultHandler: { image, _ in
+                    if let image = image {
+                        newImages.append(image)
+                    }
+                }
+            )
+        }
+        
+        print("새롭게 생성된 이미지 개수: \(newImages.count)")
+        images = newImages
     }
 }
 
